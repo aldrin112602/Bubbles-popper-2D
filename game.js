@@ -299,7 +299,7 @@ cvs.width = window.innerWidth;
       }
       if(collision_detection(enemy, fish)) {
         enemiesArray.splice(index, 1);
-        y.src = 'yelling sounds/' + yell[yellIndex];
+        y.src = yell[yellIndex];
         y.currentTime = 0;
         y.play();
         yellIndex++;
