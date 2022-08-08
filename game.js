@@ -1,4 +1,3 @@
-//Your Javascript codes here
 const cvs = document.getElementById('cvs');
 const soundEffect = document.createElement('audio');
 soundEffect.setAttribute('src', 'bubbles-single2.wav');
@@ -113,8 +112,8 @@ cvs.width = window.innerWidth;
       this.src = src;
       this.spriteWidth = 1672 / 4;
       this.spriteHeight = 1191 / 3;
-      this.width = 100;
-      this.height = 70;
+      this.width = randInt(50, 100);
+      this.height = (this.width / 2) + 10;
       this.x = cvs.width + (this.width * 2)
       this.y = randInt(200, cvs.height - this.height);
       this.frameX = 0;
@@ -153,8 +152,8 @@ cvs.width = window.innerWidth;
       this.src = src;
       this.spriteWidth = 1672 / 4;
       this.spriteHeight = 1191 / 3;
-      this.width = 100;
-      this.height = 70;
+      this.width = randInt(50, 100);
+      this.height = (this.width / 2) + 10;
       this.x = -(this.width * 2)
       this.y = randInt(200, cvs.height - this.height);
       this.frameX = 0;
@@ -258,8 +257,81 @@ cvs.width = window.innerWidth;
     }
   }
   
+  
+ class Diver_1 {
+    constructor(src) {
+      this.src = src;
+      this.spriteWidth = 805 / 4;
+      this.spriteHeight = 310 / 3;
+      this.width = 250;
+      this.height = 100;
+      this.x = -(this.width * 2)
+      this.y = randInt(200, cvs.height - this.height);
+      this.frameX = 0;
+      this.frameY = 0;
+      this.gameFrame = 0;
+      this.speed = randInt(3, 4);
+      this.staggerFrames = (this.speed >= 3)?8:10;
+      this.direction = 'toRight';
+    }
+    draw() {
+      const enemyImage = new Image();
+      enemyImage.src = this.src;
+      ctx.drawImage(enemyImage, this.frameX * this.spriteWidth, this.frameY * this.spriteHeight, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height);
+    }
+    update() {
+      this.draw();
+      if(this.gameFrame % this.staggerFrames == 0) {
+        if(this.frameX < 3) {
+          this.frameX++;
+        } else {
+          this.frameX = 0;
+        }
+      }
+      this.gameFrame++;
+      this.x += this.speed;
+    }
+  }
+ 
+ class Diver_2 {
+    constructor(src) {
+      this.src = src;
+      this.spriteWidth = 805 / 4;
+      this.spriteHeight = 310 / 3;
+      this.width = 250;
+      this.height = 100;
+      this.x = cvs.width + this.width
+      this.y = randInt(200, cvs.height - this.height);
+      this.frameX = 0;
+      this.frameY = 0;
+      this.gameFrame = 0;
+      this.speed = randInt(3, 4);
+      this.staggerFrames = (this.speed >= 3)?8:10;
+      this.direction = 'toLeft';
+    }
+    draw() {
+      const enemyImage = new Image();
+      enemyImage.src = this.src;
+      ctx.drawImage(enemyImage, this.frameX * this.spriteWidth, this.frameY * this.spriteHeight, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height);
+    }
+    update() {
+      this.draw();
+      if(this.gameFrame % this.staggerFrames == 0) {
+        if(this.frameX < 3) {
+          this.frameX++;
+        } else {
+          this.frameX = 0;
+        }
+      }
+      this.gameFrame++;
+      this.x -= this.speed;
+    }
+  }
+
+
  const enemiesArray = [];
  const dragonArray = [];
+ const divers = [];
  
  setInterval(() => {
    bubblesArray.push(new Bubble());
@@ -267,11 +339,21 @@ cvs.width = window.innerWidth;
  
  setInterval(() => {
    dragonArray.push(new Dragon('dragon.png'));
- }, randInt(30000, 50000))
+ }, 5000);
+ 
  setInterval(() => {
-   
+   divers.push(new Diver_1('diver.png'));
+ }, 10000);
+ 
+ setInterval(() => {
+   divers.push(new Diver_2('diver 2.png'));
+ }, 8000);
+ 
+ 
+ setInterval(() => {
    dragonArray.push(new DragonLeftFacing('dragon.png'));
- }, randInt(50000, 100000))
+ }, 10000);
+ 
  setInterval(() => {
   enemiesArray.push(new RedFishEnemy('red fish enemy.png'), new YellowFishEnemy('yellow fish.png')); 
  }, 10000);
@@ -297,14 +379,7 @@ cvs.width = window.innerWidth;
       if(enemy.x > cvs.width - enemy.width && enemy.color == 'yellow') {
         enemiesArray.splice(index, 1);
       }
-      if(collision_detection(enemy, fish)) {
-        enemiesArray.splice(index, 1);
-        y.src = yell[yellIndex];
-        y.currentTime = 0;
-        y.play();
-        yellIndex++;
-        if(yellIndex > yell.length - 1) yellIndex = 0;
-      }
+     
     })
     
     dragonArray.forEach((dragon, i) => {
@@ -320,6 +395,28 @@ cvs.width = window.innerWidth;
         dragonArray.splice(i, 1);
       }
     })
+    divers.forEach((diver, i) => {
+      diver.update();
+    })
+    divers.forEach((diver, i) => {
+      if(collision_detection(diver, fish)) {
+        y.src = yell[yellIndex];
+        y.currentTime = 0;
+        y.play();
+        diver.speed = 7;
+        diver.staggerFrames = 2;
+        yellIndex++;
+        if(yellIndex > yell.length - 1) yellIndex = 0;
+      } 
+    })
+   divers.forEach((d, i) => {
+     if(d.x > cvs.width - d.width && d.direction == 'toRight') {
+       divers.splice(i, 1);
+     }
+     if(d.x <= 0 && d.direction != 'toRight') {
+       divers.splice(i, 1);
+     }
+   })
  }
  
  function handleBubbles() {
