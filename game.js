@@ -136,8 +136,8 @@ cvs.width = window.innerWidth;
       this.src = src;
       this.spriteWidth = 1672 / 4;
       this.spriteHeight = 1191 / 3;
-      this.width = randInt(50, 100);
-      this.height = (this.width / 2) + 10;
+      this.width = 150;
+      this.height = 70;
       this.x = cvs.width + (this.width * 2)
       this.y = randInt(200, cvs.height - this.height);
       this.frameX = 0;
@@ -176,8 +176,8 @@ cvs.width = window.innerWidth;
       this.src = src;
       this.spriteWidth = 1672 / 4;
       this.spriteHeight = 1191 / 3;
-      this.width = randInt(50, 100);
-      this.height = (this.width / 2) + 10;
+      this.width = 150;
+      this.height = 70;
       this.x = -(this.width * 2)
       this.y = randInt(200, cvs.height - this.height);
       this.frameX = 0;
@@ -287,8 +287,8 @@ cvs.width = window.innerWidth;
       this.src = src;
       this.spriteWidth = 805 / 4;
       this.spriteHeight = 310 / 3;
-      this.width = 250;
-      this.height = 100;
+      this.width = randInt(200, 300);
+      this.height = this.width / 2;
       this.x = -(this.width * 2)
       this.y = randInt(200, cvs.height - this.height);
       this.frameX = 0;
@@ -323,8 +323,8 @@ cvs.width = window.innerWidth;
       this.src = src;
       this.spriteWidth = 805 / 4;
       this.spriteHeight = 310 / 3;
-      this.width = 250;
-      this.height = 100;
+      this.width = randInt(200, 300);
+      this.height = this.width / 2;
       this.x = cvs.width + this.width
       this.y = randInt(200, cvs.height - this.height);
       this.frameX = 0;
@@ -353,15 +353,92 @@ cvs.width = window.innerWidth;
       this.x -= this.speed;
     }
   }
- const enemiesArray = [];
- const dragonArray = [];
- const divers = [];
+ 
+ class SeaTurtle {
+    constructor(src) {
+      this.src = src;
+      this.spriteWidth = 499 / 4;
+      this.spriteHeight = 500 / 7;
+      this.width = 250;
+      this.height = 130;
+      this.x = cvs.width + this.width
+      this.y = randInt(200, cvs.height - this.height);
+      this.frameX = 0;
+      this.frameY = randInt(0, 6);
+      this.gameFrame = 0;
+      this.speed = randInt(3, 4);
+      this.staggerFrames = (this.speed >= 3)?6:10;
+      this.direction = 'toLeft';
+      this.readyToDelete = false;
+    }
+    draw() {
+      const enemyImage = new Image();
+      enemyImage.src = this.src;
+      ctx.drawImage(enemyImage, this.frameX * this.spriteWidth, this.frameY * this.spriteHeight, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height);
+    }
+    update() {
+      this.draw();
+      if(this.gameFrame % this.staggerFrames == 0) {
+        if(this.frameX < 3) {
+          this.frameX++;
+        } else {
+          this.frameX = 0;
+        }
+      }
+      this.gameFrame++;
+      this.x -= this.speed;
+      this.y += 0.3
+    }
+  }
+  
+ class SeaTurtle2 {
+    constructor(src) {
+      this.src = src;
+      this.spriteWidth = 499 / 4;
+      this.spriteHeight = 500 / 7;
+      this.width = 250;
+      this.height = 130;
+      this.x = -this.width
+      this.y = randInt(200, cvs.height - this.height);
+      this.frameX = 0;
+      this.frameY = randInt(0, 6);
+      this.gameFrame = 0;
+      this.speed = randInt(3, 4);
+      this.staggerFrames = (this.speed >= 3)?6:10;
+      this.direction = 'toRight';
+      this.readyToDelete = false;
+    }
+    draw() {
+      const enemyImage = new Image();
+      enemyImage.src = this.src;
+      ctx.drawImage(enemyImage, this.frameX * this.spriteWidth, this.frameY * this.spriteHeight, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height);
+    }
+    update() {
+      this.draw();
+      if(this.gameFrame % this.staggerFrames == 0) {
+        if(this.frameX < 3) {
+          this.frameX++;
+        } else {
+          this.frameX = 0;
+        }
+      }
+      this.gameFrame++;
+      this.x += this.speed;
+      this.y += 0.3
+    }
+  }
+   
+ const enemiesArray = [], dragonArray = [], divers = [], turtles = [];
+ 
  setInterval(() => {
    bubblesArray.push(new Bubble());
  }, 1000);
+ 
  setInterval(() => {
    dragonArray.push(new Dragon('dragon.png'));
+   turtles.push(new SeaTurtle('sea-turtle.png'), new SeaTurtle2('sea-turtle 2.png'));
  }, 5000);
+ 
  setInterval(() => {
    divers.push(new Diver_1('diver.png'));
  }, 10000);
@@ -378,6 +455,7 @@ cvs.width = window.innerWidth;
  const bgS = new Audio('blinkenlights.ogg');
  bgS.loop = true;
  cvs.addEventListener('click', () => {
+   bgS.volume = 0.8;
    bgS.play();
  })
  const fish = new Fish('fish.png');
@@ -397,10 +475,13 @@ cvs.width = window.innerWidth;
      }
    }
  } 
- const yell = [];
+ let yell = [];
  for(let i = 1; i <= 16; i++) yell.push(`1yell${i}.wav`, `3yell${i}.wav`);
  for(let i = 1; i <= 9; i++) yell.push(`2yell${i}.wav`, `yell${i}.wav`);
  for(let i = 1; i <= 6; i++) yell.push(`3grunt${i}.wav`);
+ 
+yell = yell.sort((a, b) =>  a - b);
+
  let yellIndex = 0;
  
  let plop = document.createElement('audio');
@@ -420,8 +501,18 @@ cvs.width = window.innerWidth;
      
     })
     
+    turtles.forEach(e => e.update());
     dragonArray.forEach((dragon, i) => {
       dragon.update();
+    })
+    
+    turtles.forEach((t, i) => {
+      if(t.x > cvs.width && t.direction == 'toRight') {
+        turtles.splice(i, 1);
+      }
+      if(t.x < 0 && t.direction != 'toRight') {
+        turtles.splice(i, 1);
+      }
     })
     
     dragonArray.forEach((d, i) => {
@@ -442,7 +533,7 @@ cvs.width = window.innerWidth;
     divers.forEach((diver, i) => {
       if(collision_detection(diver, fish) && !diver.readyToDelete) {
         diver.readyToDelete = true;
-        y.src = /*'yelling sounds/' +*/ yell[yellIndex];
+        y.src = yell[yellIndex];
         y.currentTime = 0;
         y.play();
         yellIndex++;
@@ -522,11 +613,11 @@ cvs.width = window.innerWidth;
     
     ctx.fillStyle = 'black';
     ctx.font = '20px Georgia';
-    ctx.fillText('Miss: ' + miss, 11, 65, 100);
+    ctx.fillText('Missed: ' + miss, 11, 65, 100);
     
     ctx.fillStyle = 'white';
     ctx.font = '20px Sans-serif';
-    ctx.fillText('Miss: ' + miss, 10, 64, 100);
+    ctx.fillText('Missed: ' + miss, 10, 64, 100);
     fish.update();
     handleBubbles();
     handdleEnemies();
