@@ -273,6 +273,7 @@ cvs.width = window.innerWidth;
       this.speed = randInt(3, 4);
       this.staggerFrames = (this.speed >= 3)?8:10;
       this.direction = 'toRight';
+      this.readyToDelete = false;
     }
     draw() {
       const enemyImage = new Image();
@@ -308,6 +309,7 @@ cvs.width = window.innerWidth;
       this.speed = randInt(3, 4);
       this.staggerFrames = (this.speed >= 3)?8:10;
       this.direction = 'toLeft';
+      this.readyToDelete = false;
     }
     draw() {
       const enemyImage = new Image();
@@ -358,6 +360,11 @@ cvs.width = window.innerWidth;
   enemiesArray.push(new RedFishEnemy('red fish enemy.png'), new YellowFishEnemy('yellow fish.png')); 
  }, 10000);
  
+ const bgS = new Audio('blinkenlights.ogg');
+ bgS.loop = true;
+ cvs.addEventListener('click', () => {
+   bgS.play();
+ })
  const fish = new Fish('fish.png');
  const yell = [];
  for(let i = 1; i <= 16; i++) yell.push(`1yell${i}.wav`, `3yell${i}.wav`);
@@ -373,10 +380,10 @@ cvs.width = window.innerWidth;
  function handdleEnemies() {
    enemiesArray.forEach((enemy, index) => { enemy.update();});
    enemiesArray.forEach((enemy, index) => {
-      if(enemy.x < 0 && enemy.color == 'red') {
+      if(enemy.x < 0 - enemy.width && enemy.color == 'red') {
         enemiesArray.splice(index, 1);
       }
-      if(enemy.x > cvs.width - enemy.width && enemy.color == 'yellow') {
+      if(enemy.x > cvs.width && enemy.color == 'yellow') {
         enemiesArray.splice(index, 1);
       }
      
@@ -387,33 +394,37 @@ cvs.width = window.innerWidth;
     })
     
     dragonArray.forEach((d, i) => {
-      if(d.direction == 'toRight' && d.x > cvs.width - d.width) {
+      if(d.direction == 'toRight' && d.x > cvs.width) {
         dragonArray.splice(i, 1);
       }
       
-      if(d.direction != 'toRight' && d.x < 0) {
+      if(d.direction != 'toRight' && d.x < 0 - d.width) {
         dragonArray.splice(i, 1);
       }
+  
     })
     divers.forEach((diver, i) => {
       diver.update();
     })
+    
+    
     divers.forEach((diver, i) => {
-      if(collision_detection(diver, fish)) {
+      if(collision_detection(diver, fish) && !diver.readyToDelete) {
+        diver.readyToDelete = true;
         y.src = yell[yellIndex];
         y.currentTime = 0;
         y.play();
-        diver.speed = 7;
-        diver.staggerFrames = 2;
         yellIndex++;
         if(yellIndex > yell.length - 1) yellIndex = 0;
+        diver.speed = 7;
+        diver.staggerFrames = 5;
       } 
     })
    divers.forEach((d, i) => {
-     if(d.x > cvs.width - d.width && d.direction == 'toRight') {
+     if(d.x > cvs.width && d.direction == 'toRight') {
        divers.splice(i, 1);
      }
-     if(d.x <= 0 && d.direction != 'toRight') {
+     if(d.x < 0 - d.width && d.direction != 'toRight') {
        divers.splice(i, 1);
      }
    })
