@@ -1,7 +1,8 @@
 const cvs = document.getElementById('cvs');
 const soundEffect = document.createElement('audio');
 soundEffect.setAttribute('src', 'bubbles-single2.wav');
-
+const particlesArray = [];
+let hue = 0;
 cvs.width = window.innerWidth;
  cvs.height = 700;
  const ctx = cvs.getContext('2d');
@@ -17,20 +18,43 @@ cvs.width = window.innerWidth;
  const bubblesArray = []; 
    
  const collision_detection = (a, b) => !(((a.y + a.height) < (b.y)) || (a.y > (b.y + b.height)) || ((a.x + a.width) < b.x) || (a.x > (b.x + b.width)));
-
+ 
+ class Particle {
+    constructor(x, y) {
+      this.speedX = Math.random() * 3 - 1.5;
+      this.speedY = Math.random() * 3 - 1.5;
+      this.size = Math.random() * 10;
+      this.x = x + 100;
+      this.y = y + 70;
+      this.color = `hsl(${hue}, 100%, 50%)`;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if(this.size > 0.2) this.size -= 0.1; 
+    }
+    draw() {
+      ctx.beginPath()
+      ctx.fillStyle = this.color
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.closePath()
+    }
+  }
+  
   class Fish {
     constructor(src) {
       this.src = src;
       this.spriteWidth = 1992 / 4;
       this.spriteHeight = 981 / 3;
-      this.width = 100;
+      this.width = 200;
       this.height = 70;
       this.x = cvs.width / 2 - this.width / 2;
       this.y = cvs.height / 2 - this.height / 2;
       this.frameX = 0;
       this.frameY = 0;
       this.gameFrame = 0;
-      this.staggerFrames = 7;
+      this.staggerFrames = 6;
     }
     draw() {
       const playerImage = new Image();
@@ -329,33 +353,24 @@ cvs.width = window.innerWidth;
       this.x -= this.speed;
     }
   }
-
-
  const enemiesArray = [];
  const dragonArray = [];
  const divers = [];
- 
  setInterval(() => {
    bubblesArray.push(new Bubble());
  }, 1000);
- 
  setInterval(() => {
    dragonArray.push(new Dragon('dragon.png'));
  }, 5000);
- 
  setInterval(() => {
    divers.push(new Diver_1('diver.png'));
  }, 10000);
- 
  setInterval(() => {
    divers.push(new Diver_2('diver 2.png'));
  }, 8000);
- 
- 
  setInterval(() => {
    dragonArray.push(new DragonLeftFacing('dragon.png'));
  }, 10000);
- 
  setInterval(() => {
   enemiesArray.push(new RedFishEnemy('red fish enemy.png'), new YellowFishEnemy('yellow fish.png')); 
  }, 10000);
@@ -366,6 +381,22 @@ cvs.width = window.innerWidth;
    bgS.play();
  })
  const fish = new Fish('fish.png');
+ 
+ function addParticles(n) {
+    for (let i = 0; i < n; i++) {
+      particlesArray.push(new Particle(fish.x, fish.y));
+    }
+  }
+ function handleParticles() {
+   for(let i = 0; i < particlesArray.length; i++) {
+     particlesArray[i].draw();
+     particlesArray[i].update();
+     if(particlesArray[i].size <= 0.3) {
+       particlesArray.splice(i, 1);
+       i--;
+     }
+   }
+ } 
  const yell = [];
  for(let i = 1; i <= 16; i++) yell.push(`1yell${i}.wav`, `3yell${i}.wav`);
  for(let i = 1; i <= 9; i++) yell.push(`2yell${i}.wav`, `yell${i}.wav`);
@@ -411,7 +442,7 @@ cvs.width = window.innerWidth;
     divers.forEach((diver, i) => {
       if(collision_detection(diver, fish) && !diver.readyToDelete) {
         diver.readyToDelete = true;
-        y.src = yell[yellIndex];
+        y.src = /*'yelling sounds/' +*/ yell[yellIndex];
         y.currentTime = 0;
         y.play();
         yellIndex++;
@@ -454,10 +485,14 @@ cvs.width = window.innerWidth;
    
  }
  
+ setInterval(() => {
+   addParticles(2)
+ }, 100)
  cvs.addEventListener("mousedown", e => {
      mouse.click = true;
      mouse.x = e.x - cvPos.left;
      mouse.y = e.y - cvPos.top;
+     addParticles(3);
      if(fish.x <= mouse.x) {
         fish.src = 'fishRightFacing.png'
       } else {
@@ -495,6 +530,9 @@ cvs.width = window.innerWidth;
     fish.update();
     handleBubbles();
     handdleEnemies();
+    handleParticles();
+    hue += 1;
+    if(hue > 360) hue = 0;
     window.requestAnimationFrame(animate);
   }
  
